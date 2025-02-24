@@ -3,6 +3,7 @@ import { generateObject } from 'ai';
 import { compact } from 'lodash-es';
 import pLimit from 'p-limit';
 import { z } from 'zod';
+import retry from 'async-retry';
 
 import { o3MiniModel, trimPrompt } from './ai/providers';
 import { systemPrompt } from './prompt';
@@ -206,14 +207,14 @@ export async function deepResearch({
     serpQueries.map(serpQuery =>
       limit(async () => {
         try {
-          const result = await firecrawl.search(serpQuery.query, {
-            timeout: 15000,
+          const result = await retry(() => firecrawl.search(serpQuery.query, {
+            timeout: 120000,
             limit: 5,
             scrapeOptions: { formats: ['markdown'] },
-          });
+          }), { retries: 3 });
 
           // Collect URLs from this search
-          const newUrls = compact(result.data.map(item => item.url));
+          const newUrls = compact(result.data.map((item: any) => item.url as string));
           const newBreadth = Math.ceil(breadth / 2);
           const newDepth = depth - 1;
 

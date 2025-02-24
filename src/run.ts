@@ -1,5 +1,6 @@
 import * as fs from 'fs/promises';
 import * as readline from 'readline';
+import * as path from 'path';
 
 import { deepResearch, writeFinalReport } from './deep-research';
 import { generateFeedback } from './feedback';
@@ -96,10 +97,11 @@ ${followUpQuestions.map((q: string, i: number) => `Q: ${q}\nA: ${answers[i]}`).j
   });
 
   // Save report to file
-  await fs.writeFile('output.md', report, 'utf-8');
+  const absolutePath = path.resolve('output.md');
+  await fs.writeFile(absolutePath, report, 'utf-8');
 
   console.log(`\n\nFinal Report:\n\n${report}`);
-  console.log('\nReport has been saved to output.md');
+  console.log(`\nReport has been saved to ${absolutePath}`);
   rl.close();
 }
 
